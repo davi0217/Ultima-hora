@@ -1,0 +1,85 @@
+
+create database newspaper;
+
+USE newspaper;
+
+create TABLE news_user(
+id BINARY(16) primary key DEFAULT (UUID_TO_BIN(UUID())),
+username VARCHAR(255) unique not NULL,
+user_password VARCHAR(600) not NULL,
+creation_date DATE not NULL,
+country VARCHAR(255) not NULL,
+city VARCHAR(255) not NULL,
+email VARCHAR(255) unique not NULL,
+image VARCHAR(600) not NULL,
+name VARCHAR(255) not NULL,
+surname VARCHAR(255) not NULL
+);
+
+
+create table user_groups(
+id binary(16) primary key DEFAULT (UUID_TO_BIN(UUID())),
+user_id binary(16) references user.id,
+group_id binary(16) references news_group.id
+);
+
+create table news_group(
+id BINARY(16) primary key DEFAULT (UUID_TO_BIN(UUID())),
+name VARCHAR(255) not null,
+creation_date DATE not null
+);
+
+create table headers(
+id binary(16) primary key DEFAULT (UUID_TO_BIN(UUID())),
+group_id binary(16) references news_group.id,
+name VARCHAR(255) not null,
+date DATE not null,
+public BOOLEAN not null
+);
+
+create table news(
+id BINARY(16) primary key DEFAULT (UUID_TO_BIN(UUID())),
+user_id binary(16) references news_user.id ,
+header_id binary(16) references header.id ,
+section_id binary(16) references news_section.id ,
+image VARCHAR(1000) not NULL,
+creation_date DATE not NULL,
+title VARCHAR(1000) not NULL,
+subtitle VARCHAR(1000) not NULL,
+content VARCHAR(10000) not null,
+caption VARCHAR(1000)not NULL
+);
+
+create table news_section(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+name VARCHAR(255)
+);
+
+create table likes(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+user_id binary(16) references news_user.id,
+news_id binary(16) references news.id
+);
+
+create table comments(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+user_id binary(16) references news_user.id,
+news_id binary(16) references news.id
+);
+
+create table news_tags(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+tag_id binary(16) references tags.id,
+news_id binary(16) references news.id
+);
+
+create table tags(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+name VARCHAR(255) not null
+);
+
+
+insert into news_section(id, name) values(
+ UUID_TO_BIN(UUID()), 'Carrera'
+ );
+
