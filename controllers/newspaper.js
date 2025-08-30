@@ -28,5 +28,35 @@ export class NewspaperController{
                 console.error(`we could not send your body ${error}`)
             }
     }
+    static createGroup=async  function(req, res){
+       try { 
+            const result=await NewspaperModel.createGroup(req.body)
+           
+            res.status(200).send(result)}catch(error){
+                console.error(`we could not send your body ${error}`)
+            }
+    }
+    static createHeader=async  function(req, res){
+       try { 
+            const result=await NewspaperModel.createHeader(req.body)
+           
+            res.status(200).send(result)}catch(error){
+                console.error(`we could not send your body ${error}`)
+            }
+    }
+    
+    static publishNews=async  function(req, res){
+       try { 
+        let result;
+            try{
+                console.log(req.body)
+                 result=await NewspaperModel.publishNews(req.body)}catch(error){
+                console.log(`problems sending you body ${error.message}`)
+            }
+           
+            res.status(200).send(result)}catch(error){
+                console.error(`we could not send your body ${error}`)
+            }
+    }
 
 }

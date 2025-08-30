@@ -6,14 +6,15 @@ POST http://localhost:3000/register
 Content-Type: application/json; charset=utf-8
 
 {
-    "username":"carlos",
-    "user_password":"carlos1234",
+    "username":"juan",
+    "user_password":"juan1234",
     "country":"Spain",
     "city":"Vigo",
-    "email":"carlos@email.com",
-    "image":"https:/img",
+    "email":"juan@email.com",
+    "image":"http://localhost:3400/image.jpg",
     "name":"Alba",
     "surname":"Sanchez"
+    
 }
 
 ###login an user
@@ -23,4 +24,36 @@ Content-Type: application/json; charset=utf-8
 {
     "username":"carlos",
     "user_password":"carlos1234"
+}
+
+###create group and set user logged is as admin
+POST http://localhost:3000/create-group
+Content-Type: application/json; charset=utf-8
+
+{
+    "name":"Pipiolas"
+}
+
+### create header
+POST http://localhost:3000/create-header
+Content-Type: application/json; charset=utf-8
+
+{
+    "name":"Journal des amis",
+    "isPublic":false
+}
+
+
+###publish news
+POST http://localhost:3000/publish-news
+Content-Type: application/json; charset=utf-8
+
+{
+  "header": "Journal des amis",
+  "section": "Amor",
+  "image": "http://example",
+  "title": "Cómo mantener viva la chispa del amor en la rutina diaria",
+  "subtitle": "Pequeños gestos y grandes cambios pueden marcar la diferencia en una relación duradera",
+  "content": "En la vorágine del día a día, es habitual que las parejas caigan en la rutina y se olviden de los detalles que fortalecen la relación. Sin embargo, mantener viva la chispa del amor no requiere de gestos grandilocuentes ni de esfuerzos inalcanzables. Investigaciones en psicología de las relaciones han demostrado que acciones simples, como dedicar unos minutos al día a conversar sin distracciones, mostrar gratitud sincera, o planear actividades compartidas que generen recuerdos positivos, tienen un impacto directo en la satisfacción de la pareja. El amor se construye y se mantiene con constancia, cuidado y comunicación. Incluso en los momentos de conflicto, aprender a escuchar sin interrumpir y validar las emociones del otro es una de las herramientas más poderosas para fortalecer la conexión emocional. En definitiva, la clave está en priorizar la relación, dedicarle tiempo consciente y recordar que el amor se nutre de atenciones diarias que, aunque parezcan pequeñas, generan un efecto acumulativo que sostiene y renueva la unión a lo largo de los años.",
+  "caption": "Una pareja caminando de la mano en un atardecer, símbolo de complicidad y conexión emocional."
 }
