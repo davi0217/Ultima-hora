@@ -9,7 +9,8 @@ export async function validateNews(object){
         "title":z.string().max(500).min(10),
         "subtitle":z.string().max(700).min(10),
         "content":z.string().min(500),
-        "caption":z.string().max(700).min(10).optional()
+        "caption":z.string().max(700).min(10).optional(),
+        "tags":z.array(z.string())
     })
 
    

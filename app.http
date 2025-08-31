@@ -1,18 +1,40 @@
-### GET ALL INFO
-GET http://localhost:3000
+
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTY1NTc2MjYsImV4cCI6MTc1NjU2MTIyNn0.md8_yHDXPNYnI7hTqbQEVRnvRj4BFHoLO0xF9dNiszI"
+
+### GET ALL USERS
+GET http://localhost:3000/users
+### GET ALL GROUPS
+GET http://localhost:3000/groups
+### GET ALL USERGROUPS
+GET http://localhost:3000/usergroups/search?group=
+### GET ALL HEADERS
+GET http://localhost:3000/headers
+### GET ALL sections
+GET http://localhost:3000/sections
+### GET NEWS FROM SECTION OR HEADER
+GET http://localhost:3000/news/search?section=Gente
+
+### GET ALL LIKES FROM A NEW
+GET http://localhost:3000/likes/search?id=c0c9334e-8684-11f0-b138-0a0027000005
+
+### GET ALL Comments FROM A NEW
+GET http://localhost:3000/comments/search?id=c0c9334e-8684-11f0-b138-0a0027000005
+### GET ALL TAGS
+GET http://localhost:3000/tags
+
 
 ###register an user
 POST http://localhost:3000/register
 Content-Type: application/json; charset=utf-8
 
 {
-    "username":"juan",
-    "user_password":"juan1234",
+    "username":"miko",
+    "user_password":"miko1234",
     "country":"Spain",
     "city":"Vigo",
-    "email":"juan@email.com",
+    "email":"miko@email.com",
     "image":"http://localhost:3400/image.jpg",
-    "name":"Alba",
+    "name":"Miko",
     "surname":"Sanchez"
     
 }
@@ -22,16 +44,27 @@ POST http://localhost:3000/login
 Content-Type: application/json; charset=utf-8
 
 {
-    "username":"carlos",
-    "user_password":"carlos1234"
+    "username":"miko",
+    "user_password":"miko1234"
 }
 
 ###create group and set user logged is as admin
 POST http://localhost:3000/create-group
 Content-Type: application/json; charset=utf-8
 
+
 {
-    "name":"Pipiolas"
+    "name":"Los mikas"
+}
+
+###add to group by username
+POST http://localhost:3000/add-to-group
+Content-Type: application/json; charset=utf-8
+
+
+{
+    "name":"miko",
+    "group":"Los mikas"
 }
 
 ### create header
@@ -39,8 +72,9 @@ POST http://localhost:3000/create-header
 Content-Type: application/json; charset=utf-8
 
 {
-    "name":"Journal des amis",
-    "isPublic":false
+    "name":"Diario de mikas",
+    "isPublic":false,
+    "group":"Los mikas"
 }
 
 
@@ -49,11 +83,33 @@ POST http://localhost:3000/publish-news
 Content-Type: application/json; charset=utf-8
 
 {
-  "header": "Journal des amis",
-  "section": "Amor",
+  "header": "Diario de mikas",
+  "section": "Gente",
   "image": "http://example",
-  "title": "Cómo mantener viva la chispa del amor en la rutina diaria",
-  "subtitle": "Pequeños gestos y grandes cambios pueden marcar la diferencia en una relación duradera",
-  "content": "En la vorágine del día a día, es habitual que las parejas caigan en la rutina y se olviden de los detalles que fortalecen la relación. Sin embargo, mantener viva la chispa del amor no requiere de gestos grandilocuentes ni de esfuerzos inalcanzables. Investigaciones en psicología de las relaciones han demostrado que acciones simples, como dedicar unos minutos al día a conversar sin distracciones, mostrar gratitud sincera, o planear actividades compartidas que generen recuerdos positivos, tienen un impacto directo en la satisfacción de la pareja. El amor se construye y se mantiene con constancia, cuidado y comunicación. Incluso en los momentos de conflicto, aprender a escuchar sin interrumpir y validar las emociones del otro es una de las herramientas más poderosas para fortalecer la conexión emocional. En definitiva, la clave está en priorizar la relación, dedicarle tiempo consciente y recordar que el amor se nutre de atenciones diarias que, aunque parezcan pequeñas, generan un efecto acumulativo que sostiene y renueva la unión a lo largo de los años.",
-  "caption": "Una pareja caminando de la mano en un atardecer, símbolo de complicidad y conexión emocional."
+  "title": "El lenguaje secreto de las miradas en una relación amorosa",
+  "subtitle": "Un estudio revela cómo los gestos no verbales fortalecen la intimidad entre parejas",
+  "content": "Las miradas, las sonrisas y los silencios compartidos forman parte de un lenguaje que muchas veces trasciende las palabras en una relación. Especialistas en comunicación no verbal explican que, cuando una pareja aprende a interpretar estos códigos íntimos, se crea un vínculo de confianza y complicidad difícil de romper. Aunque la vida cotidiana esté cargada de responsabilidades y estrés, detenerse a observar al otro y reconocer esos pequeños gestos de afecto puede marcar la diferencia en la calidad de la relación. El contacto visual, por ejemplo, genera una sensación de seguridad y validación que ayuda a consolidar la unión emocional. Asimismo, las expresiones de ternura espontáneas, como una sonrisa inesperada o un roce suave en la mano, son señales que transmiten cuidado y cercanía. En definitiva, el amor no solo se expresa con palabras: también se sostiene con un lenguaje silencioso que alimenta la confianza y fortalece el lazo afectivo día tras día.",
+  "caption": "Una pareja compartiendo una mirada cómplice durante un paseo al aire libre.",
+  "tags":["wowwwwwjwww"]
 }
+
+###like some news
+POST http://localhost:3000/like-news
+Content-Type: application/json; charset=utf-8
+
+{
+    "newsId":"c0c9334e-8684-11f0-b138-0a0027000005"
+}
+
+###give a comment
+POST http://localhost:3000/leave-comment
+Content-Type: application/json; charset=utf-8
+
+{
+    "newsId":"c0c9334e-8684-11f0-b138-0a0027000005",
+    "comment":"also loved this post"
+}
+
+
+
+
