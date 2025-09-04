@@ -72,6 +72,8 @@ export class NewspaperController{
        try { 
         let result;
             try{
+                console.log('your user is' +req.validationInfo?.user)
+                console.log('your body is' +req.body)
                  result=await NewspaperModel.publishNews(req)}catch(error){
                 console.log(`problems sending you body ${error.message}`)
             }
@@ -108,10 +110,29 @@ export class NewspaperController{
             console.log(result)
             res.send(result)
     }
+      static getUserLogged=async  function(req, res){
+
+            const result=await NewspaperModel.getUserLogged(req)
+           
+            res.send(result)
+    }
+
+      static getUserByName=async  function(req, res){
+
+            const result=await NewspaperModel.getUserByName(req)
+           
+            res.send(result)
+    }
       static getAllGroups=async  function(req, res){
 
             const result=await NewspaperModel.getAllGroups()
             console.log(result)
+            res.send(result)
+    }
+      static getGroupFromUsername=async  function(req, res){
+
+            const result=await NewspaperModel.getGroupFromUsername(req)
+            
             res.send(result)
     }
       static getUserGroupsByGroup=async  function(req, res){

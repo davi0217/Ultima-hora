@@ -6,7 +6,10 @@ import {NewspaperController} from '../controllers/newspaper.js'
 export const NewspaperRouter=Router()
 
 NewspaperRouter.get('/users',NewspaperController.getAllUsers)
+NewspaperRouter.get('/user',NewspaperController.getUserLogged)
+NewspaperRouter.get('/user/search',NewspaperController.getUserByName)
 NewspaperRouter.get('/groups',NewspaperController.getAllGroups)
+NewspaperRouter.get('/groups/search',NewspaperController.getGroupFromUsername)
 NewspaperRouter.get('/usergroups/search',NewspaperController.getUserGroupsByGroup)
 NewspaperRouter.get('/headers',NewspaperController.getAllHeaders)
 NewspaperRouter.get('/sections',NewspaperController.getAllSections)

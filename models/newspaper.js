@@ -26,23 +26,16 @@ export class NewspaperModel{
     const privateKey='dav0217'
         
         
-    
-        jwt.sign(
-            {user:username},privateKey, {algorithm: 'HS256',expiresIn:'1h', allowInsecureKeySizes:true}, function(err, token){
-                    if(err){
-                        console.log(`error trying to make token: ${err}`)
-                    }else{
-                        console.log(token)
-                        return token
-                    }
-
-            }
+    let tokenToPass= jwt.sign(
+            {user:username},privateKey, {algorithm: 'HS256',expiresIn:'1h', allowInsecureKeySizes:true}
         )
+
+        return tokenToPass
     }
     
     static getDate=function(){
         const date=new Date()
-         const  actualDate=`${date.getFullYear()}-${date.getMonth()+1}-${date.getDay()+1}`
+         const  actualDate=`${date.getFullYear()}-${date.getMonth()+1}-${date.getDay()+1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
         return actualDate
     }
 
@@ -102,16 +95,22 @@ static getTagsFromNews=async function(news_id){
                 [news_id]
             ) 
         }
-          
+        console.log(tags)
             let tagsToShow=[]
+            if(tags){
             for(let t of tags[0]){
+
+                console.log(t.tagId)
                
                 let tagToAdd=await connection.query(
                     'SELECT name FROM tags WHERE id=?',
                     [t.tagId]
                 )
-                 await tagsToShow.push(tagToAdd[0][0].name)
-            }
+
+                console.log(tagToAdd)
+                if(tagToAdd){
+                 await tagsToShow.push(tagToAdd[0][0].name)}
+            }}
 
             return tagsToShow
 }
@@ -140,7 +139,9 @@ static getTagsFromNews=async function(news_id){
                 [idToPass, newUser.username, newUser.user_password, this.getDate()  , newUser.country, newUser.city, newUser.email, newUser.image, newUser.name, newUser.surname] 
             )
 
-            return {binaryId:idToPass}
+            const newToken=await this.createToken(newUser.username)
+
+            return {token:newToken}
 
         }catch(error){
                 console.error(`your insertion provoked an error: ${error.message}`)
@@ -161,12 +162,15 @@ static getTagsFromNews=async function(news_id){
         })
 
         if(logUser){
-       try{const token=await this.createToken(username) } catch(error){
+       try{const token=await this.createToken(username) 
+
+        return logUser?{token:token}:""
+
+       } catch(error){
         console.log(`we couldnt create your token: ${error.message}`)
        }
     }
 
-        return logUser?{"message":"login succesful"}:{"message":"failed to log in"}
     }catch(error){
             return `error: ${error.message}`
         }
@@ -223,6 +227,15 @@ static getTagsFromNews=async function(news_id){
         const userGroupId=await this.getId()
         console.log(`iserGrou is: ${userGroupId}`)
 
+        const [alreadyIn]=await connection.query(
+            'SELECT id FROM user_groups WHERE (group_id=UUID_TO_BIN(?) AND user_id=UUID_TO_BIN(?))',
+            [groupId, userAddedId]
+        )
+
+        if(alreadyIn[0]?.id){
+            return 'Your user is already in the group'
+        }
+
         const [loggedUserIsAdmin]=await connection.query(
             'SELECT isAdmin FROM user_groups WHERE (group_id=UUID_TO_BIN(?) AND user_id=UUID_TO_BIN(?))',
             [groupId, userLoggedInId]
@@ -242,15 +255,15 @@ static getTagsFromNews=async function(news_id){
 
     static createHeader=async function(info){
 
-        const {name, isPublic, group}=info.body
+        const {name, isPublic, group, description}=info.body
 
         const groupUUID=await this.getIdFromName("news_group", group)
         const headerId=await this.getId()
 
         try{
             const createHeader=await connection.query(
-                'INSERT INTO headers(id, group_id,name, date, public ) VALUES(?,UUID_TO_BIN(?),?,?,?)',
-                [headerId, groupUUID,name,this.getDate(), isPublic]
+                'INSERT INTO headers(id, group_id,name, date, public, description ) VALUES(?,UUID_TO_BIN(?),?,?,?,?)',
+                [headerId, groupUUID,name,this.getDate(), isPublic, description]
             )
 
             return createHeader
@@ -265,19 +278,19 @@ static getTagsFromNews=async function(news_id){
     static publishNews=async function(info){
 
 
-
+        
         const validation=await validateNews(info.body)
 
 
         if(validation.error){
             
-            return (`your news format was wrong: ${validation.error}`)
+            return {message:validation.error} 
         }
       try{  
         
         const {header, section}=info.body
        
-        const userId=await this.getIdFromName("news_user", info.validationInfo.user)
+        const userId=await this.getIdFromName("news_user", info.validationInfo?.user)
      
         const headerId=await this.getIdFromName("headers", header)
 
@@ -286,7 +299,6 @@ static getTagsFromNews=async function(news_id){
             [headerId]
         )
 
-        console.log(group)
         const [isUserInGroup]=await connection.query(
             'SELECT user_id as ui FROM user_groups WHERE group_id=? AND user_id=UUID_TO_BIN(?)',
             [group[0].gi, userId]
@@ -306,6 +318,7 @@ static getTagsFromNews=async function(news_id){
             "INSERT INTO news (id, user_id, header_id, section_id, image, creation_date, title, subtitle, content, caption) VALUES (?,UUID_TO_BIN(?),UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,?,?)",
             [newsId, userId, headerId, sectionId, info.body.image, news_date, info.body.title, info.body.subtitle, info.body.content, info.body.caption]
         )
+       
 
         try{
             const {tags}=info.body
@@ -326,12 +339,12 @@ static getTagsFromNews=async function(news_id){
         }catch(error){
             console.log(`tag could no be inserted: ${error.message}`)
         }
-
+      
         const newsIdBin=await connection.query(
             'SELECT BIN_TO_UUID(?) AS id',
             [newsId]
         )
-        return newsIdBin[0]
+        return {newsId:newsIdBin[0]}
     
     }catch(error){
             console.log(`could not insert your news: ${error.message}`)
@@ -413,18 +426,142 @@ static getTagsFromNews=async function(news_id){
                 surname:r.surname,
                 city:r.city,
                 country:r.country,
-                image:r.image
+                image:r.image,
+                date:r.creation_date
             }
 
             infoToShow.push(userToPass)
         }
         return infoToShow
     }
+    static getUserLogged=async function(info){
+
+        const username=info.validationInfo?.user
+        
+
+        
+        const [results, fields]=await connection.query('SELECT *, SUBSTR(image, 2) as image FROM news_user WHERE username=? ',
+            [username]
+        )
+
+
+        let infoToShow=[]
+
+        for(let r of results){
+
+            const [userId]=await connection.query(
+             'SELECT BIN_TO_UUID(?) as id',
+             [r.id]
+            )
+
+            let userToPass={
+                id:userId[0],
+                username:r.username,
+                name:r.name,
+                surname:r.surname,
+                city:r.city,
+                country:r.country,
+                image:r.image,
+                date:r.creation_date
+            }
+
+            infoToShow.push(userToPass)
+        }
+        return infoToShow[0]
+    }
+    static getUserByName=async function(info){
+
+        const username=info.query.username
+        
+
+        
+        const [results, fields]=await connection.query('SELECT *, SUBSTR(image, 2) as image FROM news_user WHERE username=? ',
+            [username]
+        )
+
+
+        let infoToShow=[]
+
+        for(let r of results){
+
+            const [userId]=await connection.query(
+             'SELECT BIN_TO_UUID(?) as id',
+             [r.id]
+            )
+
+            let userToPass={
+                id:userId[0],
+                username:r.username,
+                name:r.name,
+                surname:r.surname,
+                city:r.city,
+                country:r.country,
+                image:r.image,
+                date:r.creation_date
+            }
+
+            infoToShow.push(userToPass)
+        }
+        return infoToShow[0]
+    }
     static getAllGroups=async function(){
         
         const [results, fields]=await connection.query('SELECT * FROM news_group')
 
         return results
+    }
+    static getGroupFromUsername=async function(info){
+
+       
+        const username=info.query.username
+        const userLogged=info.validationInfo?.user
+
+        try{const userId=await this.getIdFromName("news_user", username)
+        
+        const [results, fields]=await connection.query('SELECT * FROM user_groups WHERE user_id=UUID_TO_BIN(?)',
+            [userId]
+        )
+
+        let groupsToPass=[]
+
+
+        for(let r of results){
+           
+
+
+        const [groupName]=await connection.query(
+          'SELECT name FROM news_group WHERE id=?',
+            [r.group_id])
+
+            
+        const [header]=await connection.query(
+          'SELECT name, public, description FROM headers WHERE group_id=?',
+            [r.group_id])
+            
+
+            if(header[0].public==0){
+                console.log(username)
+                console.log(userLogged)
+                console.log(username!=userLogged)
+                if (username!=userLogged){
+                    continue
+                }
+            }
+
+            let newGroupInfo={
+                groupName:groupName[0].name,
+                headerName:header[0].name,
+                headerDescription:header[0].description,
+                creation_date:header[0].description,
+            }
+            groupsToPass.push(newGroupInfo)
+        }
+
+        return groupsToPass}catch(error){
+                return {error:error.message}
+        }
+
+
     }
 
     static getUserGroupsByGroup=async function(info){
@@ -535,7 +672,8 @@ static getTagsFromNews=async function(news_id){
                 "name":r.name,
                 "group":group[0].gn,
                 "public":r.public==0?false:true,
-                "creation":r.date
+                "creation":r.date,
+                "description":r.description
             }
 
             infoToPass.push(headerToPass)
@@ -569,11 +707,11 @@ static getTagsFromNews=async function(news_id){
                     
                     if(info.query.section){
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=?',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? ORDER BY a.creation_date DESC',
                      [queryToPass]
                         )}else{
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where c.name=?',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where c.name=? ORDER BY a.creation_date DESC',
                      [queryToPass]
                         )}
 
@@ -584,13 +722,13 @@ static getTagsFromNews=async function(news_id){
                     
                             const {section, header}=info.query
                         queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? and c.name=?',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? and c.name=? ORDER BY a.creation_date DESC',
                     [section, header]
                         )}
     
         }else{
             queryResult=await connection.query(
-                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id',
+                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date DESC',
             )
 
         }

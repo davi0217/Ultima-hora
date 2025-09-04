@@ -8,7 +8,7 @@ export async function validateUser(object){
         "country":z.string().max(100),
         "city":z.string().max(100),
         "email":z.email(),
-        "image":z.url(),
+        "image":z.string(),
         "name":z.string().max(100),
         "surname":z.string().max(100)
     })
