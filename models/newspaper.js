@@ -116,9 +116,13 @@ static getTagsFromNews=async function(news_id){
 }
     
 
-    static register=async function(user){
+    static register=async function(req){
 
-        const userResult=await validateUser(user)
+        console.log(req.file.path)
+        console.log()
+        const userInfo={...JSON.parse(req.body.info), 'image':req.file.path}
+        console.log(userInfo)
+        const userResult=await validateUser(userInfo)
 
         if(userResult.error){
             return `The user is not in the right format ${userResult.error}`
@@ -126,8 +130,8 @@ static getTagsFromNews=async function(news_id){
 
         try{
            
-            const hashedPassword=await bcrypt.hash(user.user_password, 6)
-            const newUser={...user, "user_password":hashedPassword}
+            const hashedPassword=await bcrypt.hash(userInfo.user_password, 6)
+            const newUser={...userInfo, "user_password":hashedPassword}
           
 
             //la conexion nos devuelve una tupla de objetos, esta es la forma de saber cual es la key del objeto 0 de la tupla (es "UUID()")
@@ -193,7 +197,7 @@ static getTagsFromNews=async function(news_id){
          try{
 
             //!!!!!este es el id que hay que cambiar por el obtenido de jwt 
-            const userUUID=await this.getIdFromName("news_user",info.validationInfo.user)
+            const userUUID=await this.getIdFromName("news_user",info.validationInfo?.user)
            
             const userGroupId= await this.getId()
 
@@ -202,11 +206,11 @@ static getTagsFromNews=async function(news_id){
                 [userGroupId, userUUID, newGroup.id, true ]
             ) 
         }catch(error){
-            console.log(`your user could not be registered as part of the group: ${error.message}`)
+            return {message:`your user could not be registered as part of the group: ${error.message}`}
         }
 
         return {"creation-group":result, "usergroup-registered":newUserGroup}}catch(error){
-            console.log(`your group could not be created: ${error.message}`)
+            return {message:`your group could not be created: ${error.message}`}
         }
 
         //en cuanto tengamos el grupo, tenemos que registrar al usuario que lo ha creado como admin del grupo en user_groups
@@ -217,15 +221,12 @@ static getTagsFromNews=async function(news_id){
 
     static addToGroup=async function(info){
         const {name, group}=info.body
-        console.log(group)
+       
         const groupId=await this.getIdFromName("news_group", group)
-        console.log(`group id is: ${groupId}`)
+      
         const userAddedId=await this.getIdFromName("news_user", name)
-        console.log(`USERTOADD id is: ${userAddedId}`)
-        const userLoggedInId=await this.getIdFromName("news_user", info.validationInfo.user)
-       console.log(`user logges id is: ${userLoggedInId}`)
+        const userLoggedInId=await this.getIdFromName("news_user", info.validationInfo?.user)
         const userGroupId=await this.getId()
-        console.log(`iserGrou is: ${userGroupId}`)
 
         const [alreadyIn]=await connection.query(
             'SELECT id FROM user_groups WHERE (group_id=UUID_TO_BIN(?) AND user_id=UUID_TO_BIN(?))',
@@ -241,15 +242,15 @@ static getTagsFromNews=async function(news_id){
             [groupId, userLoggedInId]
           
         )
-        console.log(loggedUserIsAdmin)
+       
         if(loggedUserIsAdmin[0]?.isAdmin==1){
         const addUser=await connection.query(
             'INSERT INTO user_groups (id, user_id, group_id, isAdmin ) VALUES (?, UUID_TO_BIN(?), UUID_TO_BIN(?), ?)',
             [userGroupId, userAddedId, groupId, false]
         )
 
-        return userGroupId}else{
-            return `You're not the admin of this group`
+        return {message:'Your user was added correctly'}}else{
+                return  {message:'We could not add your user'}
         }
     }
 
@@ -357,7 +358,7 @@ static getTagsFromNews=async function(news_id){
         const {newsId}=info.body
         const likeId=await this.getId()
 
-        const userId=await this.getIdFromName("news_user", info.validationInfo.user)
+        const userId=await this.getIdFromName("news_user", info.validationInfo?.user)
 
         try{
             const checkLike=await connection.query(
@@ -369,7 +370,7 @@ static getTagsFromNews=async function(news_id){
             for(let like of checkLike[0]){
 
                     if(like.ui==userId && like.ni==newsId){
-                        return `The user has already liked the news`
+                        return {message: `The user has already liked the news`}
                     }
             }
            
@@ -378,9 +379,9 @@ static getTagsFromNews=async function(news_id){
                 'INSERT INTO likes(id, user_id, news_id) VALUES (?, UUID_TO_BIN(?), UUID_TO_BIN(?))',
                 [likeId, userId, newsId]
             )
-            return `liked was inserted with id: ${likeId}`
+            return {message:`liked was inserted with id: ${likeId}`}
         }catch(error){
-            return (`like could not be inserted: ${error.message}`)
+            return {message:`like could not be inserted: ${error.message}`}
         }
 
 
@@ -397,9 +398,9 @@ static getTagsFromNews=async function(news_id){
                 'INSERT INTO comments(id, user_id, news_id, content) VALUES (?, UUID_TO_BIN(?), UUID_TO_BIN(?), ?)',
                 [commentId, userId, newsId, comment]
             )
-            return `comment was inserted with id: ${commentId}`
+            return {message:`comment was inserted with id: ${commentId}`}
         }catch(error){
-            return (`like could not be inserted: ${error.message}`)
+            return {message:`like could not be inserted: ${error.message}`}
         }
 
 
@@ -440,7 +441,7 @@ static getTagsFromNews=async function(news_id){
         
 
         
-        const [results, fields]=await connection.query('SELECT *, SUBSTR(image, 2) as image FROM news_user WHERE username=? ',
+        const [results, fields]=await connection.query('SELECT *, image as image FROM news_user WHERE username=? ',
             [username]
         )
 
@@ -475,7 +476,7 @@ static getTagsFromNews=async function(news_id){
         
 
         
-        const [results, fields]=await connection.query('SELECT *, SUBSTR(image, 2) as image FROM news_user WHERE username=? ',
+        const [results, fields]=await connection.query('SELECT *, image FROM news_user WHERE username=? ',
             [username]
         )
 
@@ -539,10 +540,8 @@ static getTagsFromNews=async function(news_id){
             [r.group_id])
             
 
-            if(header[0].public==0){
-                console.log(username)
-                console.log(userLogged)
-                console.log(username!=userLogged)
+            if(header[0]?.public==0 || !header[0]){
+                
                 if (username!=userLogged){
                     continue
                 }
@@ -550,10 +549,10 @@ static getTagsFromNews=async function(news_id){
 
             let newGroupInfo={
                 groupName:groupName[0].name,
-                headerName:header[0].name,
-                headerDescription:header[0].description,
-                creation_date:header[0].description,
+                headerName:header[0]?.name?header[0].name:'',
+                headerDescription:header[0]?.description?header[0].description:'',
             }
+           
             groupsToPass.push(newGroupInfo)
         }
 
@@ -699,15 +698,25 @@ static getTagsFromNews=async function(news_id){
         const validates=info.validationInfo?.user
         
         let queryResult;
-        
-        if(info.query.section || info.query.header){
+
+        if(info.query.id){
+
+            queryResult=await connection.query(
+                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id WHERE a.id=UUID_TO_BIN(?) ORDER BY a.creation_date DESC',
+                  [info.query.id]
+            )
+
+
+        }else if(info.query.section || info.query.header){
             
                 if(!info.query.section || !info.query.header){
+
+                    
                     let queryToPass=info.query.section?info.query.section:info.query.header
                     
                     if(info.query.section){
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? ORDER BY a.creation_date DESC',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") ORDER BY a.creation_date DESC',
                      [queryToPass]
                         )}else{
                     queryResult=await connection.query(
@@ -722,16 +731,16 @@ static getTagsFromNews=async function(news_id){
                     
                             const {section, header}=info.query
                         queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? and c.name=? ORDER BY a.creation_date DESC',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") and c.name=? ORDER BY a.creation_date DESC',
                     [section, header]
                         )}
     
-        }else{
-            queryResult=await connection.query(
-                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date DESC',
-            )
+                }else{
+                    queryResult=await connection.query(
+                        'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date DESC',
+                    )
 
-        }
+                }
 
         if(validates){
 
@@ -826,7 +835,7 @@ static getTagsFromNews=async function(news_id){
         const [results, fields]=await connection.query('SELECT COUNT(*) AS count FROM likes WHERE news_id=UUID_TO_BIN(?)',
             [info.query.id]
         )
-        const [users]=await connection.query('SELECT user_id as id FROM likes WHERE news_id=UUID_TO_BIN(?)',
+        const [users]=await connection.query('SELECT BIN_TO_UUID(id) as like_id, user_id as id FROM likes WHERE news_id=UUID_TO_BIN(?)',
             [info.query.id]
         )
 
@@ -840,7 +849,8 @@ static getTagsFromNews=async function(news_id){
 
             let userToPush={
                 "username":newUser[0].username,
-                "image":newUser[0].image
+                "image":newUser[0].image,
+                "likeId":user.like_id
             }
             usersToPass.push(userToPush)
         }
@@ -884,7 +894,7 @@ static getTagsFromNews=async function(news_id){
             currentUser.push(userIdToUUID[0].id)
             
             let [newUser]=await connection.query(
-                'SELECT username, image FROM news_user WHERE id=?',
+                'SELECT username, SUBSTR(image,2) as image FROM news_user WHERE id=?',
                 [user.id]
             )
             let [userComments]=await connection.query(
@@ -918,6 +928,253 @@ static getTagsFromNews=async function(news_id){
         return results
     }
 
-    
+    static getRequestsByUsername=async function(info){
+
+        const username=info.validationInfo?.user
+
+        try{
+
+            const userLoggedId=await this.getIdFromName('news_user', username)
+           
+            const [groups]=await connection.query(
+                'SELECT group_id as gi FROM user_groups WHERE user_id=UUID_TO_BIN(?) AND isAdmin=1',
+                [userLoggedId]
+            )
+
+            let request=[]
+
+            for(let g of groups){
+              
+                let [requests]=await connection.query(
+                    'SELECT BIN_TO_UUID(id) as id, user_id as ui, content, creation_date as date FROM requests WHERE group_id=? ORDER BY creation_date DESC',
+                    [g.gi]
+                )
+
+                let [groupName]=await connection.query(
+                    'SELECT name from news_group WHERE id=?',
+                    [g.gi]
+            )
+
+            
+                for (let r of requests){
+                    let [username]=await connection.query(
+                    'SELECT username, SUBSTR(image,2) as image from news_user WHERE id=?',
+                    [r.ui]
+                    )
+          
+                
+                 let requestInfo={
+                        id:r.id,
+                        username:username[0].username,
+                        groupName:groupName[0].name,
+                        content:r.content,
+
+                        image:username[0].image
+                     }
+
+                     request.push(requestInfo)
+                  
+                }
+
+            }
+
+            return request
+
+
+
+
+        }catch(error){return {message:error.message}}
+        
+        
+    }
+
+    static getPendingRequestsByUsername=async function(info){
+
+        const username=info.validationInfo?.user
+
+        try{
+
+            let userLoggedId=await this.getIdFromName('news_user', username)
+   
+                let [requests]=await connection.query(
+                    'SELECT BIN_TO_UUID(id) as id, user_id as ui, group_id as gi, content, creation_date as date FROM requests WHERE user_id=UUID_TO_BIN(?) ORDER BY creation_date DESC',
+                    [userLoggedId]
+                )
+
+                let request=[]
+            
+                for (let r of requests){
+
+                    let [group]=await connection.query(
+                        'SELECT name from news_group WHERE id=?',
+                        [r.gi]
+                    )
+          
+                
+                 let requestInfo={
+                        id:r.id,
+                        username:username,
+                        groupName:group[0].name,
+                        content:r.content,
+                     }
+
+            request.push(requestInfo)
+                
+                
+
+            }
+
+            return request
+
+
+
+
+        }catch(error){return {message:error.message}}
+        
+        
+    }
+
+
+
+    static makeRequest=async function(info){
+
+
+        const username=info.validationInfo?.user
+        const groupName=info.body.group
+        const text=info.body.text
+
+        try{
+            const userLoggedId=await this.getIdFromName('news_user', username)
+            const groupId=await this.getIdFromName('news_group', groupName)
+            console.log(userLoggedId, groupId)
+            const date=await this.getDate()
+
+            const newRequestId=await this.getId()
+
+            const [requests]=await connection.query(
+                'SELECT user_id as ui, group_id as gi from requests WHERE user_id=UUID_TO_BIN(?) AND group_id=UUID_TO_BIN(?)',
+                [userLoggedId, groupId]
+            )
+
+            if(requests[0]?.ui){return {message:'your request has already been made'}}
+
+
+            const [result]=await connection.query(
+                'INSERT INTO requests(id, user_id, group_id, creation_date, content) VALUES (?, UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?)',
+                [newRequestId, userLoggedId, groupId, date, text]
+            )
+
+            return {message:`your request from user ${username} for join ${groupName} has been made with id ${newRequestId}`}
+
+
+        }catch(error){
+            return {message:error.message}
+        }
+
+    }
+
+    static deleteRequestById=async function(info){
+
+        const username=info.validationInfo.user
+        const requestId=info.body.id
+
+        try{
+
+            const userLoggedId=await this.getIdFromName('news_user', username)
+            
+            const [request]=await connection.query(
+                'SELECT id, group_id as gi from requests WHERE id=UUID_TO_BIN(?)',
+                [requestId]
+            )
+
+            const [isAdmin]=await connection.query(
+                'SELECT isAdmin FROM user_groups WHERE group_id=? AND user_id=UUID_TO_BIN(?)',
+                [request[0].gi, userLoggedId]
+            )
+
+            if(isAdmin[0].isAdmin==0){
+                return {message:'you can`t make this action as you are not the admin of the group'}
+            }else if(isAdmin[0].isAdmin==1){
+                const [del]=await connection.query(
+                    'DELETE FROM requests WHERE id=UUID_TO_BIN(?)',
+                    [requestId]
+                )
+
+                return {message:`your request was deleted correctly: ${del}`}
+            }
+
+
+
+        }catch(error){
+            return {message:error.message}
+        }
+
+    }
+
+    static deleteCommentById=async function(info){
+
+        const username=info.validationInfo?.user
+        const commentId=info.body?.id
+
+        try{
+
+            const userLoggedId=await this.getIdFromName('news_user', username)
+            
+            const [comment]=await connection.query(
+                'SELECT id, user_id as ui from comments WHERE id=UUID_TO_BIN(?) AND user_id=UUID_TO_BIN(?)',
+                [commentId, userLoggedId]
+            )
+
+            if(!(comment[0].id && comment[0].ui)){
+                return {message:'you can`t make this action as you are not the creator of the comment'}
+            }else if((comment[0].id && comment[0].ui)){
+                const [del]=await connection.query(
+                    'DELETE FROM comments WHERE id=?',
+                    [comment[0].id]
+                )
+
+                return {message:`your comment was deleted correctly: ${del}`}
+            }
+
+
+
+        }catch(error){
+            return {message:error.message}
+        }
+
+    }
+    static deleteLikeById=async function(info){
+
+        const username=info.validationInfo?.user
+        const likeId=info.body?.id
+
+        try{
+
+            const userLoggedId=await this.getIdFromName('news_user', username)
+            
+            const [like]=await connection.query(
+                'SELECT id, user_id as ui from likes WHERE id=UUID_TO_BIN(?) AND user_id=UUID_TO_BIN(?)',
+                [likeId, userLoggedId]
+            )
+
+            if(!(like[0].id && like[0].ui)){
+                return {message:'you can`t make this action as you are not the creator of the like'}
+            }else if((like[0].id && like[0].ui)){
+                const [del]=await connection.query(
+                    'DELETE FROM likes WHERE id=?',
+                    [like[0].id]
+                )
+
+                return {message:`your like was deleted correctly: ${del}`}
+            }
+
+
+
+        }catch(error){
+            return {message:error.message}
+        }
+
+    }
+  
 
 }

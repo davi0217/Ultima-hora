@@ -13,9 +13,9 @@ export class NewspaperController{
   
 
     static register=async  function(req, res){
-       try { console.log(req.body)
+       try { console.log(req)
 
-            const result=await NewspaperModel.register(req.body)
+            const result=await NewspaperModel.register(req)
             console.log(result)
             res.send(result)}catch(error){
                 console.error(`we could not send your body ${error}`)
@@ -182,6 +182,42 @@ export class NewspaperController{
       static getAllTags=async  function(req, res){
 
             const result=await NewspaperModel.getAllTags()
+            console.log(result)
+            res.send(result)
+    }
+      static getRequestsByUsername=async  function(req, res){
+
+            const result=await NewspaperModel.getRequestsByUsername(req)
+            console.log(result)
+            res.send(result)
+    }
+      static getPendingRequestsByUsername=async  function(req, res){
+
+            const result=await NewspaperModel.getPendingRequestsByUsername(req)
+            console.log(result)
+            res.send(result)
+    }
+      static makeRequest=async  function(req, res){
+
+            const result=await NewspaperModel.makeRequest(req)
+            console.log(result)
+            res.send(result)
+    }
+      static deleteRequestById=async  function(req, res){
+
+            const result=await NewspaperModel.deleteRequestById(req)
+            console.log(result)
+            res.send(result)
+    }
+      static deleteCommentById=async  function(req, res){
+
+            const result=await NewspaperModel.deleteCommentById(req)
+            console.log(result)
+            res.send(result)
+    }
+      static deleteLikeById=async  function(req, res){
+
+            const result=await NewspaperModel.deleteLikeById(req)
             console.log(result)
             res.send(result)
     }

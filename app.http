@@ -5,33 +5,77 @@ const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTY1NTc2MjYsImV4cC
 GET http://localhost:3000/users
 ### GET LoggedLL USERS
 GET http://localhost:3000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicGVkcm8iLCJpYXQiOjE3NTY5NzY3NTMsImV4cCI6MTc1Njk4MDM1M30.trGDQhNnyrPRHtJkod7LgaNfM9goYAY_MAFE7-hIhyk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEzIiwiaWF0IjoxNzU3MTQ0NDc3LCJleHAiOjE3NTcxNDgwNzd9.bWSMJF9W8Q2c2ezaMINv-mLe7Q5PHwhLgz1z04w4Gis
 
 ###get user by username
-GET http://localhost:3000/user/search?username=user3
+GET http://localhost:3000/user/search?username=victorious
 
 ### GET ALL GROUPS
 GET http://localhost:3000/groups
 ### GET GROUPS FROM USER
 GET http://localhost:3000/groups/search?username=carla
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTY5ODkxMjksImV4cCI6MTc1Njk5MjcyOX0.zRvKSh53RkopQ0FXmRAAK-nDOKZ_0MGvW4tyZ3sYZqE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTcxNjkyODUsImV4cCI6MTc1NzE3Mjg4NX0.9k-kV8qTC136X3Ri911_xay7VzDVTIwbOJHNQO6rhZI
 
 ### GET ALL USERGROUPS
-GET http://localhost:3000/usergroups/search?group=Las acacias
+GET http://localhost:3000/usergroups/search?group=
 ### GET ALL HEADERS
 GET http://localhost:3000/headers
 ### GET ALL sections
 GET http://localhost:3000/sections
 ### GET NEWS FROM SECTION OR HEADER
-GET http://localhost:3000/news/search?section=
+GET http://localhost:3000/news/search?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaa20000005
+
 
 ### GET ALL LIKES FROM A NEW
-GET http://localhost:3000/likes/search?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaa20000002
+GET http://localhost:3000/likes/search?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaa20000005
 
 ### GET ALL Comments FROM A NEW
 GET http://localhost:3000/comments/search?id=aaaaaaaa-aaaa-aaaa-aaaa-aaaa20000002
 ### GET ALL TAGS
 GET http://localhost:3000/tags
+
+###GET REQUESTS FROM THE GROUP I'M ADMIN OF
+GET http://localhost:3000/my-requests
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTcxNDQ2MDEsImV4cCI6MTc1NzE0ODIwMX0.oBib3m-vgnpC45TC2JVPu33crEwrc43PGAgcQJmRa1c
+###GET requests SENT BY ME
+GET http://localhost:3000/pending-requests
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTcxNDQ2MDEsImV4cCI6MTc1NzE0ODIwMX0.oBib3m-vgnpC45TC2JVPu33crEwrc43PGAgcQJmRa1c
+
+###DELETE REQUEST BY request id
+DELETE http://localhost:3000/request
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer 
+
+{
+    "id":"ssss"
+}
+
+###DELETE comment BY commment id
+DELETE http://localhost:3000/comment
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer 
+
+{
+    "id":"ssss"
+}
+###DELETE like BY like id
+DELETE http://localhost:3000/like
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer 
+
+{
+    "id":"ssss"
+}
+
+### MAKE REQUEST TO JOIN GROUP
+POST http://localhost:3000/make-request
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTcxNjI0MjcsImV4cCI6MTc1NzE2NjAyN30.9L7OWmE4VcqvQwTbexLDG-Qg0ug1ObMQQm-cg3sQzho
+
+{
+    "group":"Los pedros",
+    "text":"I would love to join pedros"
+}
 
 
 ###register an user
@@ -55,18 +99,18 @@ POST http://localhost:3000/login
 Content-Type: application/json; charset=utf-8
 
 {
-    "username":"marcos",
-    "user_password":"marcos1234"
+    "username":"carla",
+    "user_password":"carla1234"
 }
 
 ###create group and set user logged is as admin
 POST http://localhost:3000/create-group
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTY5ODkxMjksImV4cCI6MTc1Njk5MjcyOX0.zRvKSh53RkopQ0FXmRAAK-nDOKZ_0MGvW4tyZ3sYZqE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicGVkcm8iLCJpYXQiOjE3NTcxNjIzNDYsImV4cCI6MTc1NzE2NTk0Nn0.-Qtz-RrV_u5pGcVtaIqeSahFEV_KzBuvS4TWRoE6PMg
 Content-Type: application/json; charset=utf-8
 
 
 {
-    "name":"Las carlas"
+    "name":"Los pedros"
 }
 
 ###add to group by username
@@ -75,8 +119,8 @@ Content-Type: application/json; charset=utf-8
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEiLCJpYXQiOjE3NTY5ODkxMjksImV4cCI6MTc1Njk5MjcyOX0.zRvKSh53RkopQ0FXmRAAK-nDOKZ_0MGvW4tyZ3sYZqE
 
 {
-    "name":"carla3",
-    "group":"Las carlas"
+    "name":"pablo",
+    "group":"Las acacias"
 }
 
 ### create header

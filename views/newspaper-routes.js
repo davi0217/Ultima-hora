@@ -1,7 +1,11 @@
 import express from 'express'
+import multer from 'multer'
 
 import { Router } from 'express'
 import {NewspaperController} from '../controllers/newspaper.js'
+
+const upload=multer({dest:'static/imgs'})
+
 
 export const NewspaperRouter=Router()
 
@@ -19,7 +23,7 @@ NewspaperRouter.get('/news/search',NewspaperController.getNewsBySectionAndHeader
 NewspaperRouter.get('/likes/search',NewspaperController.getLikesFromNews)
 NewspaperRouter.get('/comments/search',NewspaperController.getCommentsFromNews)
 NewspaperRouter.get('/tags',NewspaperController.getAllTags)
-NewspaperRouter.post('/register',NewspaperController.register)
+NewspaperRouter.post('/register',upload.single('file'),NewspaperController.register)
 NewspaperRouter.post('/login',NewspaperController.login)
 NewspaperRouter.post('/create-group',NewspaperController.createGroup)
 NewspaperRouter.post('/add-to-group',NewspaperController.addToGroup)
@@ -27,3 +31,9 @@ NewspaperRouter.post('/create-header',NewspaperController.createHeader)
 NewspaperRouter.post('/publish-news',NewspaperController.publishNews)
 NewspaperRouter.post('/like-news',NewspaperController.likeNews)
 NewspaperRouter.post('/leave-comment',NewspaperController.leaveComment)
+NewspaperRouter.post('/make-request',NewspaperController.makeRequest)
+NewspaperRouter.get('/my-requests',NewspaperController.getRequestsByUsername)
+NewspaperRouter.get('/pending-requests',NewspaperController.getPendingRequestsByUsername)
+NewspaperRouter.delete('/request',NewspaperController.deleteRequestById)
+NewspaperRouter.delete('/comment',NewspaperController.deleteCommentById)
+NewspaperRouter.delete('/like',NewspaperController.deleteLikeById)

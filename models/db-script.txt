@@ -79,6 +79,14 @@ id binary(16) primary key default (UUID_TO_BIN(UUID())),
 name VARCHAR(255) unique not null
 );
 
+create table requests(
+id binary(16) primary key default (UUID_TO_BIN(UUID())),
+content VARCHAR(255),
+user_id binary(16) references news_user.id,
+group_id binary(16) references news_group.id,
+creation_date DATETIME not null
+);
+
 
 
 
