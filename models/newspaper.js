@@ -148,7 +148,7 @@ static getTagsFromNews=async function(news_id){
             return {token:newToken}
 
         }catch(error){
-                console.error(`your insertion provoked an error: ${error.message}`)
+                return {message:`your insertion provoked an error: ${error.message}`}
         }
 
     }
@@ -171,7 +171,7 @@ static getTagsFromNews=async function(news_id){
         return logUser?{token:token}:""
 
        } catch(error){
-        console.log(`we couldnt create your token: ${error.message}`)
+        return {message:`we couldnt create your token: ${error.message}`}
        }
     }
 
@@ -279,17 +279,19 @@ static getTagsFromNews=async function(news_id){
     static publishNews=async function(info){
 
 
-        
-        const validation=await validateNews(info.body)
+        let validation=await validateNews(JSON.parse(info.body.info))
 
 
         if(validation.error){
             
             return {message:validation.error} 
         }
-      try{  
+        try{  
+            validation={...JSON.parse(info.body.info), 'image':info.file.path}
+
+            console.log(validation)
         
-        const {header, section}=info.body
+        const {header, section}=validation
        
         const userId=await this.getIdFromName("news_user", info.validationInfo?.user)
      
@@ -317,12 +319,12 @@ static getTagsFromNews=async function(news_id){
         const news_date=await this.getDate()
         const publishNews=await connection.query(
             "INSERT INTO news (id, user_id, header_id, section_id, image, creation_date, title, subtitle, content, caption) VALUES (?,UUID_TO_BIN(?),UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,?,?)",
-            [newsId, userId, headerId, sectionId, info.body.image, news_date, info.body.title, info.body.subtitle, info.body.content, info.body.caption]
+            [newsId, userId, headerId, sectionId, validation.image, news_date, validation.title, validation.subtitle, validation.content, validation.caption]
         )
        
 
         try{
-            const {tags}=info.body
+            const {tags}=validation
 
             await tags.forEach(async (t)=>{
                 const tagId=await this.getId()
@@ -345,6 +347,8 @@ static getTagsFromNews=async function(news_id){
             'SELECT BIN_TO_UUID(?) AS id',
             [newsId]
         )
+
+        console.log(newsIdBin)
         return {newsId:newsIdBin[0]}
     
     }catch(error){
@@ -659,7 +663,7 @@ static getTagsFromNews=async function(news_id){
 
         let infoToPass=[]
 
-        for(let r of results){
+        try{for(let r of results){
          
 
             const [group]=await connection.query(
@@ -679,7 +683,9 @@ static getTagsFromNews=async function(news_id){
 
         }
 
-        return infoToPass
+        return {headers:infoToPass}}catch(error){
+            return {message:error.message}
+        }
     }
     static getAllSections=async function(){
         
@@ -702,7 +708,7 @@ static getTagsFromNews=async function(news_id){
         if(info.query.id){
 
             queryResult=await connection.query(
-                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id WHERE a.id=UUID_TO_BIN(?) ORDER BY a.creation_date DESC',
+                  'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id WHERE a.id=UUID_TO_BIN(?) ORDER BY a.creation_date DESC',
                   [info.query.id]
             )
 
@@ -716,11 +722,11 @@ static getTagsFromNews=async function(news_id){
                     
                     if(info.query.section){
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") ORDER BY a.creation_date DESC',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") ORDER BY a.creation_date DESC',
                      [queryToPass]
                         )}else{
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where c.name=? ORDER BY a.creation_date DESC',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where c.name=? ORDER BY a.creation_date DESC',
                      [queryToPass]
                         )}
 
@@ -731,16 +737,117 @@ static getTagsFromNews=async function(news_id){
                     
                             const {section, header}=info.query
                         queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") and c.name=? ORDER BY a.creation_date DESC',
+                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") and c.name=? ORDER BY a.creation_date DESC',
                     [section, header]
                         )}
     
                 }else{
                     queryResult=await connection.query(
-                        'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, SUBSTR(a.image,2) as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date DESC',
+                        'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date ASC',
                     )
 
                 }
+
+        if(validates){
+
+            let publicFilteredNews=[]
+            for(let query of queryResult[0]){
+                const tagsToShow= await this.getTagsFromNews(query.news_id)
+               
+                const [headerResult]=await connection.query(
+                    'SELECT public as public from headers where id=?',
+                    [query.header_id]
+                )
+                
+             if(headerResult[0].public==1){
+                
+                let newPublicNews={
+                    ...query,
+                    tags:tagsToShow
+                }
+              
+                publicFilteredNews.push(newPublicNews)
+            }else{
+                console.log(query)
+                const [groupId]=await connection.query(
+                    'SELECT group_id as gid FROM headers WHERE id=?',
+                    [query.header_id]
+                )
+
+                console.log('gid is '+groupId[0].gid)
+                console.log(info.validationInfo.user)
+                const userId=await this.getIdFromName("news_user", info.validationInfo.user)
+                console.log(userId)
+                const [validateUser]=await connection.query(
+                    'SELECT BIN_TO_UUID(user_id) as ui FROM user_groups WHERE group_id=?',
+                    [ groupId[0].gid]
+                )
+
+                let publicNewsAnyway=validateUser.some((v)=>{
+                    return v.ui==userId
+
+                })
+
+                if(publicNewsAnyway){
+                let newPublicNews={
+                    ...query,
+                    tags:tagsToShow
+                }
+              
+                publicFilteredNews.push(newPublicNews)
+                }
+
+                continue
+                }
+            
+            }
+            return publicFilteredNews
+
+        }else{
+            
+            let privateFilteredNews=[]
+            
+            
+            for(let query of queryResult[0]){
+                const tagsToShow=await this.getTagsFromNews(query.news_id)       
+
+                
+                const [headerResult]=await connection.query(
+                    'SELECT public as public from headers where id=?',
+                    [query.header_id]
+                )
+
+                
+
+             if(headerResult[0].public==1){let newPrivateNews={
+                    ...query,
+                    content:query.content.slice(0,400),
+                    tags:tagsToShow
+                }
+                privateFilteredNews.push(newPrivateNews)}else{
+                    continue
+                }
+
+            }
+
+            return privateFilteredNews
+        }
+
+    }
+    static getMostLikedNews=async function(info){
+
+        
+        const validates=info.validationInfo?.user
+        
+        let queryResult;
+
+        
+            queryResult=await connection.query(
+                'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section , COUNT(*) as total_likes from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id join likes on a.id=likes.news_id group by a.id ORDER BY COUNT(*) desc;'  
+            )
+
+
+        
 
         if(validates){
 
@@ -894,7 +1001,7 @@ static getTagsFromNews=async function(news_id){
             currentUser.push(userIdToUUID[0].id)
             
             let [newUser]=await connection.query(
-                'SELECT username, SUBSTR(image,2) as image FROM news_user WHERE id=?',
+                'SELECT username,  image FROM news_user WHERE id=?',
                 [user.id]
             )
             let [userComments]=await connection.query(
@@ -958,7 +1065,7 @@ static getTagsFromNews=async function(news_id){
             
                 for (let r of requests){
                     let [username]=await connection.query(
-                    'SELECT username, SUBSTR(image,2) as image from news_user WHERE id=?',
+                    'SELECT username,  image from news_user WHERE id=?',
                     [r.ui]
                     )
           

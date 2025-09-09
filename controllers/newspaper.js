@@ -73,7 +73,7 @@ export class NewspaperController{
         let result;
             try{
                 console.log('your user is' +req.validationInfo?.user)
-                console.log('your body is' +req.body)
+                
                  result=await NewspaperModel.publishNews(req)}catch(error){
                 console.log(`problems sending you body ${error.message}`)
             }
@@ -162,6 +162,12 @@ export class NewspaperController{
       static getNewsBySectionAndHeader=async  function(req, res){
 
             const result=await NewspaperModel.getNewsBySectionAndHeader(req)
+            
+            res.send(result)
+    }
+      static getMostLikedNews=async  function(req, res){
+
+            const result=await NewspaperModel.getMostLikedNews(req)
             
             res.send(result)
     }
