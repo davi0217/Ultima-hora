@@ -713,7 +713,7 @@ static getTagsFromNews=async function(news_id){
         
         let queryResult;
 
-        if(info.query.id){
+       try{ if(info.query.id){
 
             queryResult=await connection.query(
                   'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id WHERE a.id=UUID_TO_BIN(?) ORDER BY a.creation_date DESC',
@@ -839,6 +839,8 @@ static getTagsFromNews=async function(news_id){
             }
 
             return privateFilteredNews
+        }}catch(error){
+            return {message:`${error.message}`}
         }
 
     }

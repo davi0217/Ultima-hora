@@ -5,7 +5,7 @@ const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTY1NTc2MjYsImV4cC
 GET http://localhost:3000/users
 ### GET LoggedLL USERS
 GET http://localhost:3000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiX2RhdmlzYW5jaGV6IiwiaWF0IjoxNzU3NTc4MDc2LCJleHAiOjE3NTc1ODE2NzZ9.2VItkLDy9-6TX2eHh9SnlmEu9yXxKk17Tq9Xt6MPQJM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiX2RhdmlzYW5jaGV6IiwiaWF0IjoxNzU3NTgwNTM1LCJleHAiOjE3NTc1OTEzMzV9.UV83CCi_4xR45CsC3_4-EJwUho4XIzpgR4cJsng4h5Q
 
 ###update user bio
 PUT http://localhost:3000/description
