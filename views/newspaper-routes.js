@@ -5,9 +5,7 @@ import { Router } from 'express'
 import {NewspaperController} from '../controllers/newspaper.js'
 
 
-
-const storage=multer.memoryStorage()
-const upload=multer({dest:'static/imgs'})
+const upload=multer()
 
 
 export const NewspaperRouter=Router()

@@ -23,7 +23,6 @@ export class NewspaperController{
     static register=async  function(req, res){
        try { console.log('Body:', req.body);
     console.log('File:', req.file ? req.file.originalname : null);
-    console.log('FileBuffe:', req.file ? req.file.buffer : null);
 
               let imageUrl = null;
               if (req.file) {
