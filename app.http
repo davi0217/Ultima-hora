@@ -5,7 +5,7 @@ const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTY1NTc2MjYsImV4cC
 GET http://localhost:3000/users
 ### GET LoggedLL USERS
 GET http://localhost:3000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEzIiwiaWF0IjoxNzU3MTQ0NDc3LCJleHAiOjE3NTcxNDgwNzd9.bWSMJF9W8Q2c2ezaMINv-mLe7Q5PHwhLgz1z04w4Gis
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiX2RhdmlzYW5jaGV6IiwiaWF0IjoxNzU3NTc4MDc2LCJleHAiOjE3NTc1ODE2NzZ9.2VItkLDy9-6TX2eHh9SnlmEu9yXxKk17Tq9Xt6MPQJM
 
 ###update user bio
 PUT http://localhost:3000/description
@@ -109,8 +109,8 @@ POST http://localhost:3000/login
 Content-Type: application/json; charset=utf-8
 
 {
-    "username":"carla",
-    "user_password":"carla1234"
+    "username":"_davisanchez",
+    "user_password":"davi1234"
 }
 
 ###create group and set user logged is as admin

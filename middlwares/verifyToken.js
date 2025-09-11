@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
+import process from 'process'
 
 
 export const verifyToken = function(req, res, next){
    
-    const privateKey="dav0217"
       
     try{
 
@@ -12,7 +12,7 @@ export const verifyToken = function(req, res, next){
                 token=req.headers.authorization.split(' ')[1]
         }
         
-        jwt.verify(token, privateKey, {"algorithms":["HS256"] }, function(err, decoded){
+        jwt.verify(token, process.env.JWT_KEY, {"algorithms":["HS256"] }, function(err, decoded){
         if(err){
             console.log(`error verifying your token: ${err}`)
         }
