@@ -121,11 +121,10 @@ static getTagsFromNews=async function(news_id){
 }
     
 
-    static register=async function(req){
+    static register=async function(req, imageUrl){
 
-        console.log(req.file.path)
-        console.log()
-        const userInfo={...JSON.parse(req.body.info), 'image':req.file.path}
+       
+        const userInfo={...JSON.parse(req.body.info), 'image':imageUrl}
         console.log(userInfo)
         const userResult=await validateUser(userInfo)
 

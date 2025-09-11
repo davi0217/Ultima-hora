@@ -1,6 +1,14 @@
 import express from 'express'
 import {NewspaperModel} from '../models/newspaper.js'
 
+import {v2 as cloudinary} from 'cloudinary'
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 export class NewspaperController{
 
     static async validateToken(info, res){
@@ -15,7 +23,23 @@ export class NewspaperController{
     static register=async  function(req, res){
        try { console.log(req)
 
-            const result=await NewspaperModel.register(req)
+              let imageUrl = null;
+              if (req.file) {
+                const uploadResult = await new Promise((resolve, reject) => {
+                  const stream = cloudinary.uploader.upload_stream(
+                   
+                    (error, result) => {
+                      if (error) reject(error);
+                      else resolve(result);
+                    }
+                  );
+                  stream.end(req.file.buffer);
+                });
+                imageUrl = uploadResult.secure_url;
+              }
+
+
+            const result=await NewspaperModel.register(req, imageUrl)
             console.log(result)
             res.send(result)}catch(error){
                 console.error(`we could not send your body ${error}`)
