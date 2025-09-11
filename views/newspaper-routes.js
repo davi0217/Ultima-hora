@@ -38,3 +38,4 @@ NewspaperRouter.get('/pending-requests',NewspaperController.getPendingRequestsBy
 NewspaperRouter.delete('/request',NewspaperController.deleteRequestById)
 NewspaperRouter.delete('/comment',NewspaperController.deleteCommentById)
 NewspaperRouter.delete('/like',NewspaperController.deleteLikeById)
+NewspaperRouter.put('/description',NewspaperController.updateDescription)

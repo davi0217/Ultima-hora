@@ -7,6 +7,14 @@ GET http://localhost:3000/users
 GET http://localhost:3000/user
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEzIiwiaWF0IjoxNzU3MTQ0NDc3LCJleHAiOjE3NTcxNDgwNzd9.bWSMJF9W8Q2c2ezaMINv-mLe7Q5PHwhLgz1z04w4Gis
 
+###update user bio
+PUT http://localhost:3000/description
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiY2FybGEzIiwiaWF0IjoxNzU3MTQ0NDc3LCJleHAiOjE3NTcxNDgwNzd9.bWSMJF9W8Q2c2ezaMINv-mLe7Q5PHwhLgz1z04w4Gis
+
+{
+    "description":"xxxx"
+}
 ###get user by username
 GET http://localhost:3000/user/search?username=victorious
 

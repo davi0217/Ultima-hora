@@ -1,5 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import process from 'process'
+import * as dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import mysql from 'mysql2/promise'
 import {validateUser} from '../utils/validateUser.js'
@@ -8,13 +10,16 @@ import { id } from 'zod/v4/locales'
 import { _isoDateTime } from 'zod/v4/core'
 import { group } from 'console'
 
-const config={
-    "host":"localhost",
-    "port":3308,
-    "user":"root",
-    "password":'',
-    "database":"newspaper"
-}
+
+
+dotenv.config()
+ const config={
+    "host":process.env.DB_HOST,
+    "port":10445,
+    "user":"avnadmin",
+    "password":process.env.DB_PASSWORD,
+    "database":"defaultdb"
+}  
 
 
 const connection=await mysql.createConnection(config)
@@ -23,7 +28,7 @@ const connection=await mysql.createConnection(config)
 export class NewspaperModel{
 
     static createToken=async function(username){
-    const privateKey='dav0217'
+    const privateKey=process.env.JWT_KEY
         
         
     let tokenToPass= jwt.sign(
@@ -432,7 +437,8 @@ static getTagsFromNews=async function(news_id){
                 city:r.city,
                 country:r.country,
                 image:r.image,
-                date:r.creation_date
+                date:r.creation_date,
+                description:r.description
             }
 
             infoToShow.push(userToPass)
@@ -467,7 +473,8 @@ static getTagsFromNews=async function(news_id){
                 city:r.city,
                 country:r.country,
                 image:r.image,
-                date:r.creation_date
+                date:r.creation_date,
+                description:r.description
             }
 
             infoToShow.push(userToPass)
@@ -502,7 +509,8 @@ static getTagsFromNews=async function(news_id){
                 city:r.city,
                 country:r.country,
                 image:r.image,
-                date:r.creation_date
+                date:r.creation_date,
+                description:r.description
             }
 
             infoToShow.push(userToPass)
@@ -1283,5 +1291,23 @@ static getTagsFromNews=async function(news_id){
 
     }
   
+        static updateDescription=async function(info){
 
+            const username=info.validationInfo?.user
+            const newDescription=info.body?.description
+
+            try{
+
+                const userId=await this.getIdFromName('news_user',username)
+
+                const [result]=await connection.query(
+                    'UPDATE news_user SET description=? WHERE id=UUID_TO_BIN(?) ',
+                    [newDescription, userId]
+                )
+
+                return {message:`Your description was updated:${result}`}
+            }catch(error){
+                return {message:`we could not update your description:${error}`}
+            }
+        }
 }

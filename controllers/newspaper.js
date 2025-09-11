@@ -227,4 +227,10 @@ export class NewspaperController{
             console.log(result)
             res.send(result)
     }
+      static updateDescription=async  function(req, res){
+
+            const result=await NewspaperModel.updateDescription(req)
+            console.log(result)
+            res.send(result)
+    }
 }
