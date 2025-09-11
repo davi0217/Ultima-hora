@@ -37,7 +37,7 @@ export class NewspaperController{
                   stream.end(req.file.buffer);
                 });
                 imageUrl = uploadResult.secure_url;
-                console.log('imageUrl: '+imageUrl)
+                
               }
 
 
@@ -100,7 +100,23 @@ export class NewspaperController{
             try{
                 console.log('your user is' +req.validationInfo?.user)
                 
-                 result=await NewspaperModel.publishNews(req)}catch(error){
+              let imageUrl = null;
+              if (req.file) {
+                const uploadResult = await new Promise((resolve, reject) => {
+                  const stream = cloudinary.uploader.upload_stream(
+                   
+                    (error, result) => {
+                      if (error) reject(error);
+                      else resolve(result);
+                    }
+                  );
+                  stream.end(req.file.buffer);
+                });
+                imageUrl = uploadResult.secure_url;
+                
+              }
+                
+                 result=await NewspaperModel.publishNews(req, imageUrl)}catch(error){
                 console.log(`problems sending you body ${error.message}`)
             }
            

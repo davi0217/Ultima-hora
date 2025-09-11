@@ -280,7 +280,7 @@ static getTagsFromNews=async function(news_id){
     }
 
 
-    static publishNews=async function(info){
+    static publishNews=async function(info, imageUrl){
 
 
         let validation=await validateNews(JSON.parse(info.body.info))
@@ -291,7 +291,7 @@ static getTagsFromNews=async function(news_id){
             return {message:validation.error} 
         }
         try{  
-            validation={...JSON.parse(info.body.info), 'image':info.file.path}
+            validation={...JSON.parse(info.body.info), 'image':imageUrl}
 
             console.log(validation)
         
