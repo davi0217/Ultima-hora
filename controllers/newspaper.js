@@ -23,6 +23,7 @@ export class NewspaperController{
     static register=async  function(req, res){
        try { console.log('Body:', req.body);
     console.log('File:', req.file ? req.file.originalname : null);
+    console.log('FileBuffer:', req.file ? req.file.buffer : null);
 
               let imageUrl = null;
               if (req.file) {
@@ -37,6 +38,7 @@ export class NewspaperController{
                   stream.end(req.file.buffer);
                 });
                 imageUrl = uploadResult.secure_url;
+                console.log('imageUrl: '+imageUrl)
               }
 
 
