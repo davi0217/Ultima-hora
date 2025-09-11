@@ -717,6 +717,8 @@ static getTagsFromNews=async function(news_id){
         
         let queryResult;
 
+        console.log(info.query.section)
+
        try{ if(info.query.id){
 
             queryResult=await connection.query(
@@ -733,10 +735,14 @@ static getTagsFromNews=async function(news_id){
                     let queryToPass=info.query.section?info.query.section:info.query.header
                     
                     if(info.query.section){
+                        console.log('Im here')
+                        console.log(queryToPass)
                     queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") ORDER BY a.creation_date DESC',
+                    "select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header, c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where d.name=? OR d.name='Opinión' ORDER BY a.creation_date DESC",
                      [queryToPass]
-                        )}else{
+                        )
+                    
+                    }else{
                     queryResult=await connection.query(
                     'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where c.name=? ORDER BY a.creation_date DESC',
                      [queryToPass]
@@ -749,13 +755,13 @@ static getTagsFromNews=async function(news_id){
                     
                             const {section, header}=info.query
                         queryResult=await connection.query(
-                    'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name="Opinión") and c.name=? ORDER BY a.creation_date DESC',
+                    "select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content,a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id where (d.name=? OR d.name='Opinión') and c.name=? ORDER BY a.creation_date DESC",
                     [section, header]
                         )}
     
                 }else{
                     queryResult=await connection.query(
-                        'select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date ASC',
+                        "select BIN_TO_UUID(a.id) as news_id, a.title as title, a.creation_date as date, a.subtitle as subtitle,a.caption as caption,a.content as content, a.image as image,b.username as username, c.name as header,c.id as header_id,d.name as section from news as a join news_user as b on a.user_id=b.id join headers as c on a.header_id=c.id join news_section as d on a.section_id=d.id ORDER BY a.creation_date ASC",
                     )
 
                 }
