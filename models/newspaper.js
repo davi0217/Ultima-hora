@@ -125,7 +125,7 @@ static getTagsFromNews=async function(news_id){
 
        
         const userInfo={...JSON.parse(req.body.info), 'image':imageUrl}
-        console.log(userInfo)
+
         const userResult=await validateUser(userInfo)
 
         if(userResult.error){

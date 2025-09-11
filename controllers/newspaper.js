@@ -42,7 +42,7 @@ export class NewspaperController{
             const result=await NewspaperModel.register(req, imageUrl)
             console.log(result)
             res.send(result)}catch(error){
-                console.error(`we could not send your body ${error}`)
+                return {message:error.message}
             }
     }
 
