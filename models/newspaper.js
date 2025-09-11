@@ -32,7 +32,7 @@ export class NewspaperModel{
         
         
     let tokenToPass= jwt.sign(
-            {user:username},privateKey, {algorithm: 'HS256',expiresIn:'1h', allowInsecureKeySizes:true}
+            {user:username},privateKey, {algorithm: 'HS256',expiresIn:'3h', allowInsecureKeySizes:true}
         )
 
         return tokenToPass
