@@ -5,6 +5,8 @@ import { env } from 'process'
 import {NewspaperRouter} from './views/newspaper-routes.js'
 import {verifyToken} from './middlwares/verifyToken.js'
 import * as dotenv from 'dotenv'
+import path from 'path'
+
 
 
 const app=express()
@@ -18,7 +20,7 @@ app.use(cors())
 app.use(verifyToken)
 
 
-app.use('/static',express.static('static') )
+app.use('/static',express.static(path.join(process.cwd(), 'static'))) 
 
 app.use(express.json())
 

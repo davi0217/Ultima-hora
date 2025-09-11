@@ -31,7 +31,7 @@ GET http://localhost:3000/headers
 ### GET ALL sections
 GET http://localhost:3000/sections
 ### GET NEWS FROM SECTION OR HEADER
-GET http://localhost:3000/news/search?section=Gente
+GET http://localhost:3000/news/search?
 ### GET  most liked NEWS
 GET http://localhost:3000/news/most-liked
 
