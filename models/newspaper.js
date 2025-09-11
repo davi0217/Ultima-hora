@@ -451,7 +451,7 @@ static getTagsFromNews=async function(news_id){
         
 
         
-        const [results, fields]=await connection.query('SELECT *, image as image FROM news_user WHERE username=? ',
+       try{ const [results, fields]=await connection.query('SELECT *, image as image FROM news_user WHERE username=? ',
             [username]
         )
 
@@ -479,7 +479,9 @@ static getTagsFromNews=async function(news_id){
 
             infoToShow.push(userToPass)
         }
-        return infoToShow[0]
+        return infoToShow[0]}catch(error){
+            return {message:error.message}
+        }
     }
     static getUserByName=async function(info){
 
@@ -487,7 +489,7 @@ static getTagsFromNews=async function(news_id){
         
 
         
-        const [results, fields]=await connection.query('SELECT *, image FROM news_user WHERE username=? ',
+        try{const [results, fields]=await connection.query('SELECT *, image FROM news_user WHERE username=? ',
             [username]
         )
 
@@ -515,7 +517,9 @@ static getTagsFromNews=async function(news_id){
 
             infoToShow.push(userToPass)
         }
-        return infoToShow[0]
+        return infoToShow[0]}catch(error){
+            return {message:error.message}
+        }
     }
     static getAllGroups=async function(){
         
